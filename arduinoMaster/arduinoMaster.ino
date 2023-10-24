@@ -1,118 +1,85 @@
 #include <SoftwareSerial.h>
+#include <string.h>
+/*#include <iostream>
+using namespace std;*/
+//#include <vector.h>
 
 SoftwareSerial ArduinoSlave(10,11);
 
-char cmd="";
+String cmd;
+String old_cmd;
+String answer;
+String old_answer;
 
-char old_cmd;
+String butStr;
+String luzStr;
 
-char answer="";
-
-char old_answer;
-
-
-
-
-int button = 12;
-
+int buttonPin = 12;
 int led = 13;
-
 bool estadoled = 0;
-
-
-
 int val_luz=0;
-
 const int LDR=A0;
 
-
-
 void setup(){
-
   Serial.begin(9600);
-
   Serial.println("ENTER Commands:");
 
   ArduinoSlave.begin(9600);
 
-
-
-  pinMode(button, INPUT_PULLUP);
-
+  pinMode(buttonPin, INPUT_PULLUP);
   pinMode(led, OUTPUT);
-
-
-
 }
 
+ 
+
 void loop(){
+ int val_luz = analogRead(LDR);
+ luzStr = String(val_luz);
+ //Serial.print("Valor de luz: ");
+ //Serial.println(val_luz);
+ delay(1500);
 
-  int val_luz = analogRead(LDR);
+if (digitalRead(buttonPin) == LOW){
+ //estadoled = !estadoled;
+ //digitalWrite(led, estadoled);
+ //Serial.println("Botão LOW");
+ butStr = 'L';
+ } else{
+ //Serial.println("Botão HIGH");
+ butStr = 'H';
+ }
 
-  Serial.print("Valor de luz: ");
+//Serial.println(butStr);
+ cmd = butStr + "*" + valStr;
+ //Serial.println (cmd);
+ //old_cmd=cmd;
+ //old_answer=answer;
 
-  Serial.println(val_luz);
 
-  delay(500);
+ //Read answer from slave
+ readSlavePort();
+ //Send data to slave
+ //if(cmd!=old_cmd){
+ Serial.print("Master sent : ");
+ Serial.println(cmd);
+ ArduinoSlave.write(cmd);
+ //ArduinoSlave.write(val_luz);
+ old_cmd = cmd;
 
-
-
-  if (digitalRead(button == LOW){
-
-    //estadoled = !estadoled;
-
-    //digitalWrite(led, estadoled);
-
-    Serial.println("Botão LOW");
-
-  } else {
-
-    Serial.println("Botão HIGH");
-
+//}
+ //Send answer to monitor
+if (answer!=""){
+  Serial.print("Slave received : ");
+  Serial.println(answer);
   }
+}
 
+void readSlavePort(){
+ delay(10);
 
+if (ArduinoSlave.available() >0){
+ char c = ArduinoSlave.read();
+ answer += c;
 
-  old_cmd=cmd;
-
-  old_answer=answer;
-
-  //Read command from monitor
-
-  if(Serial.available()){
-
-    cmd=Serial.read();
-
-  }
-
-    //Read answer from slave
-
-    if (ArduinoSlave.available()){
-
-      answer=ArduinoSlave.read();
-
-    }
-
-    //Send data to slave
-
-    if(cmd!=old_cmd){
-
-      Serial.print("Master sent : ");
-
-      Serial.println(cmd);
-
-      ArduinoSlave.write(cmd);
-
-    }
-
-    //Send answer to monitor
-
-    if (answer!=old_answer){
-
-      Serial.print("Slave received : ");
-
-      Serial.println(answer);
-
-    }
-
+}
 }
