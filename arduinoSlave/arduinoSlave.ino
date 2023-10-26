@@ -18,51 +18,62 @@ void setup() {
 }
 
 void loop() {
+delay(1000);
  readMasterPort();
- valLuz = atoi(luz);
 
-if (but == "H"){
+ //Serial.println(luz);
+ if (luz != ""){
+    valLuz = luz.toInt();
+ }
+
+if (but == 'H'){
+ Serial.println("Botão HIGH");
  analogWrite(ledPin, 255);
+ String resposta = String(255);
+ resposta = resposta + ']';
+ ArduinoMaster.print(resposta);
+
  } else {
+Serial.println("Botão LOW");
  if (valLuz != oldValLuz){
- Serial.print("Master sent: light value is ");
+ Serial.print("Master sent: light value ");
  Serial.println(valLuz);
 
 ledPower = map(valLuz, 0, 1023, 0, 255);
  Serial.print("Led intensity: ");
- Serial.print(ledPower);
- Serial.println("%");
+ Serial.println(255 - ledPower);
 
-ArduinoMaster.print(ledPower);
- analogWrite(ledPin, ledPower);
+ 
+ analogWrite(ledPin, 255 - ledPower);
  oldValLuz = valLuz;
+ ledPower = 255 - ledPower;
+ String resposta = String(ledPower);
+ resposta = resposta + ']';
+ ArduinoMaster.print(resposta);
  }
 }
 
 }
 
 void readMasterPort(){
- delay(10);
  if (ArduinoMaster.available() > 0){
- char c = ArduinoMaster.read();
- msg += c;
+ bool colchete = false; 
+ while(colchete == false){
+  char c = ArduinoMaster.read();
+  if(c == ']'){
+    colchete = true;
+  } else {
+    msg += c;
+  }
 
+ }
+  
 }
  ArduinoMaster.flush();
+ 
 
 int asteriscoIndex = msg.indexOf('*');
- but = msg.substring(0, asteriscoIndex);
- luz = msg.substring(asteriscoIndex + 1);
-
+but = msg.substring(0, asteriscoIndex);
+luz = msg.substring(asteriscoIndex + 1);
+msg = "";
 }
-
-/*void convertMsgToCmd(){
- if (msg.length() > 0){
- Serial.print("Message size: ");
- Serial.println(msg.length());
-
-char carrayl [6];
- msg.toCharArray(carrayl, sizeof(carrayl));
- val = atoi(carrayl)
- }
-}*/
