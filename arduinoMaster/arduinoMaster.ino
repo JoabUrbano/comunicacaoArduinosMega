@@ -14,9 +14,9 @@ String luzStr;
 int buttonPin = 12;
 int led = 13;
 bool estadoled = 0;
-int val_luz=0;
-const int LDR=A0;
-int b;
+int val_luz = 0;
+const int LDR = A0;
+int valButton;
 
 void setup(){
   Serial.begin(9600);
@@ -30,48 +30,45 @@ void setup(){
  
 
 void loop(){
- int val_luz = analogRead(LDR);
- luzStr = String(val_luz);
- //Serial.print("Valor de luz: ");
- Serial.println(val_luz);
- delay(1500);
- b = digitalRead(buttonPin);
+  int val_luz = analogRead(LDR); // Recebe o valor do LDR
+  luzStr = String(val_luz); // Transforma o valor lido do LDR em uma string
+  Serial.print("Valor de luz: ");
+  Serial.println(val_luz);
+  valButton = digitalRead(buttonPin);
 
-if (b == LOW){
-  butStr = 'L';
- } else{
- Serial.println("Botão HIGH");
-  butStr = 'H';
- }
+  if (valButton == LOW){ // Se o botão não foi pressionado
+    butStr = 'L';
+  } else{ // Se foi pressionado
+    Serial.println("Botão HIGH");
+    butStr = 'H';
+  }
 
- msg = butStr + '*' + luzStr + ']';
+  msg = butStr + '*' + luzStr + ']'; // Concatena os textos do estado do botão e do valor do LDR separados po *
 
+  // Ler a resposta do arduino escravo
+  readSlavePort();
+  // Imprime a mensagem do escravo
+  if (answer!=""){
+    Serial.print("Slave answer: ");
+    Serial.println(answer);
+    answer = ""; // Após imprimir a mensagem limpa ela
+  }
+  //  Manda a mensagem para o escravo
+  Serial.print("Master sent : ");
+  Serial.println(msg);
+  ArduinoSlave.print(msg);
+  //ArduinoSlave.write(val_luz);
+  old_msg = msg;
+  delay(1500);
 
- //Read answer from slave
- readSlavePort();
- //Send answer to monitor
-if (answer!=""){
-  Serial.print("Slave received : ");
-  Serial.println(answer);
-  answer = "";
 }
- //Send data to slave
- Serial.print("Master sent : ");
- Serial.println(msg);
- ArduinoSlave.print(msg);
- //ArduinoSlave.write(val_luz);
- old_msg = msg;
 
-}
-
-void readSlavePort(){
-  delay(10);
-  if (ArduinoSlave.available() > 0){
-    bool colchete = false; 
-    while(colchete == false){
+void readSlavePort(){ // Ler a porta do escravo
+  if (ArduinoSlave.available() > 0){ // Ver se a mensagem está disponível
+    while(true){ // Enquanto a mensagem não chegar ao caractere final que é o [ recebe a mensagem
       char c = ArduinoSlave.read();
       if(c == ']' || c == -1){
-        colchete = true;
+        break;
       } else {
         answer += c;
     }
