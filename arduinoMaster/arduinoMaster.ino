@@ -12,7 +12,6 @@ String butStr;
 String luzStr;
 
 int buttonPin = 12;
-int led = 13;
 bool estadoled = 0;
 int val_luz = 0;
 const int LDR = A0;
@@ -20,11 +19,9 @@ int valButton;
 
 void setup(){
   Serial.begin(9600);
-
   ArduinoSlave.begin(9600);
 
   pinMode(buttonPin, INPUT_PULLUP);
-  pinMode(led, OUTPUT);
 }
 
  
@@ -42,7 +39,6 @@ void loop(){
     Serial.println("Botão HIGH");
     butStr = 'H';
   }
-
   msg = butStr + '*' + luzStr + ']'; // Concatena os textos do estado do botão e do valor do LDR separados po *
 
   // Ler a resposta do arduino escravo
@@ -60,7 +56,6 @@ void loop(){
   //ArduinoSlave.write(val_luz);
   old_msg = msg;
   delay(1500);
-
 }
 
 void readSlavePort(){ // Ler a porta do escravo
@@ -72,7 +67,6 @@ void readSlavePort(){ // Ler a porta do escravo
       } else {
         answer += c;
     }
-
    } 
   }
 }
